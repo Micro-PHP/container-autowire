@@ -1,5 +1,5 @@
 {
-    "name": "micro/component-autowire",
+    "name": "micro/autowire",
     "description": "Micro Framework: Component for autowiring services",
     "type": "library",
     "license": "MIT",
