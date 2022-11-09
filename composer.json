@@ -1,6 +1,6 @@
 {
     "name": "micro/autowire",
-    "description": "Micro Framework: Component for autowiring services",
+    "description": "Micro Framework: Component for autoconfiguring services",
     "type": "library",
     "license": "MIT",
     "version": "0.1",
