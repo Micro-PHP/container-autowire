@@ -17,6 +17,6 @@
     ],
     "require": {
         "php": ">=8.0",
-        "psr/container": "^1"
+        "micro/dependency-injection": "^1"
     }
 }
