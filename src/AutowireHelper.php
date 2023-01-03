@@ -23,11 +23,11 @@ class AutowireHelper implements AutowireHelperInterface
     {
         return function () use ($target) {
             try {
-                if(is_string($target)) {
+                if (is_string($target)) {
                     return new $target(...$this->resolveArguments($target));
                 }
 
-                if(is_array($target)) {
+                if (is_array($target)) {
                     $object = $target[0];
                     $method = $target[1];
 
@@ -36,15 +36,24 @@ class AutowireHelper implements AutowireHelperInterface
                     return call_user_func($target, ...$arguments);
                 }
 
-                if(is_callable($target)) {
+                if (is_callable($target)) {
                     return $this->autowireCallback($target);
                 }
-            } catch (\Throwable $exception) {
-                $this->throwAutowireException($target, $exception->getMessage(), $exception);
+            } catch (ReflectionException $exception) {
+                throw $this->throwAutowireException($target, $exception->getMessage(), $exception);
             }
+
+            $this->throwAutowireException($target, '');
         };
     }
 
+    /**
+     * @param string|array|callable $target
+     * @param string $message
+     * @param \Throwable|null $parent
+     *
+     * @throws ContainerExceptionInterface
+     */
     protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null)
     {
         if(is_array($target)) {
