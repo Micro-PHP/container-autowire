@@ -3,7 +3,6 @@
     "description": "Micro Framework: Component for autoconfiguring services",
     "type": "library",
     "license": "MIT",
-    "version": "1.1",
     "autoload": {
         "psr-4": {
             "Micro\\Component\\DependencyInjection\\Autowire\\": "src/"
@@ -16,7 +15,6 @@
         }
     ],
     "require": {
-        "php": ">=8.0",
         "micro/dependency-injection": "^1"
     }
 }
