@@ -22,26 +22,40 @@ class AutowireHelper implements AutowireHelperInterface
     public function autowire(string|array|callable $target): callable
     {
         return function () use ($target) {
+            try {
+                if(is_string($target)) {
+                    return new $target(...$this->resolveArguments($target));
+                }
 
-            if(is_string($target)) {
-                return new $target(...$this->resolveArguments($target));
+                if(is_array($target)) {
+                    $object = $target[0];
+                    $method = $target[1];
+
+                    $arguments = $this->resolveArguments(get_class($object), $method);
+
+                    return call_user_func($target, ...$arguments);
+                }
+
+                if(is_callable($target)) {
+                    return $this->autowireCallback($target);
+                }
+            } catch (\Throwable $exception) {
+                $this->throwAutowireException($target, $exception->getMessage(), $exception);
             }
-
-            if(is_array($target)) {
-                $object = $target[0];
-                $method = $target[1];
-
-                $arguments = $this->resolveArguments(get_class($object), $method);
-
-                return call_user_func($target, ...$arguments);
-            }
-
-            if(is_callable($target)) {
-                return $this->autowireCallback($target);
-            }
-
-            throw new class((sprintf('Autowire exception.'))) extends \RuntimeException implements ContainerExceptionInterface {};
         };
+    }
+
+    protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null)
+    {
+        if(is_array($target)) {
+            $target = $target[0];
+        }
+
+        if(is_callable($target)) {
+            $target = 'Anonymous';
+        }
+
+        throw new class((sprintf('Can not autowire "%s". %s', $target, $message)), 0, $parent) extends \RuntimeException implements ContainerExceptionInterface {};
     }
 
     /**
@@ -56,9 +70,8 @@ class AutowireHelper implements AutowireHelperInterface
         $ref = new \ReflectionFunction($target);
 
         return $target(...$this->resolveArgumentsFromReflectionParametersObject(
-                $ref->getParameters()
-            )
-        );
+            $ref->getParameters()
+        ));
     }
 
     /**
