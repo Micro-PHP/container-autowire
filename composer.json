@@ -1,13 +1,8 @@
 {
     "name": "micro/autowire",
     "description": "Micro Framework: Component for autoconfiguring services",
-    "type": "library",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Micro\\Component\\DependencyInjection\\Autowire\\": "src/"
-        }
-    },
+    "type": "library",
     "authors": [
         {
             "name": "Stanislau Komar",
@@ -16,5 +11,38 @@
     ],
     "require": {
         "micro/dependency-injection": "^1"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.29",
+        "phpmd/phpmd": "^2.13",
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Micro\\Component\\DependencyInjection\\Autowire\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        }
+    },
+    "scripts": {
+        "coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text",
+        "phpcs": "./vendor/bin/phpcs --standard=phpcs.xml ./src/",
+        "phpmd": "./vendor/bin/phpmd ./src/ github ./phpmd.xml",
+        "phpunit": "./vendor/bin/phpunit",
+        "statics": [
+            "@phpmd",
+            "@phpcs",
+            "@psalm"
+        ],
+        "test": [
+            "@statics",
+            "composer validate --strict",
+            "composer normalize",
+            "@coverage"
+        ]
     }
 }
