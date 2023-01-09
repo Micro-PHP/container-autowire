@@ -15,17 +15,15 @@ class ContainerAutowire extends Container
     /**
      * @param Container $container
      */
-    public function __construct(private Container $container)
+    public function __construct(private readonly Container $container)
     {
-        parent::__construct();
-
         $this->autowireHelperFactory = new AutowireHelperFactory($this->container);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function get(string $id)
+    public function get(string $id): object
     {
         return $this->container->get($id);
     }

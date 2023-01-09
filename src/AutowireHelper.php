@@ -5,14 +5,10 @@ namespace Micro\Component\DependencyInjection\Autowire;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 
 class AutowireHelper implements AutowireHelperInterface
 {
-    /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(private ContainerInterface $container)
+    public function __construct(private readonly ContainerInterface $container)
     {
     }
 
@@ -39,11 +35,11 @@ class AutowireHelper implements AutowireHelperInterface
                 if (is_callable($target)) {
                     return $this->autowireCallback($target);
                 }
-            } catch (ReflectionException $exception) {
+            } catch (\ReflectionException $exception) {
                 throw $this->throwAutowireException($target, $exception->getMessage(), $exception);
             }
 
-            $this->throwAutowireException($target, '');
+            $this->throwAutowireException($target, 'Invalid target given');
         };
     }
 
@@ -64,7 +60,9 @@ class AutowireHelper implements AutowireHelperInterface
             $target = 'Anonymous';
         }
 
-        throw new class((sprintf('Can not autowire "%s". %s', $target, $message)), 0, $parent) extends \RuntimeException implements ContainerExceptionInterface {};
+        $message = sprintf('Can not autowire "%s". %s', $target, $message);
+        throw new class($message, 0, $parent) extends \RuntimeException implements ContainerExceptionInterface {
+        };
     }
 
     /**
@@ -72,7 +70,7 @@ class AutowireHelper implements AutowireHelperInterface
      * @return mixed
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     private function autowireCallback(callable $target): mixed
     {
@@ -89,12 +87,14 @@ class AutowireHelper implements AutowireHelperInterface
      * @return array
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
+     * @throws \ReflectionException
      */
     protected function resolveArguments(string $className, ?string $method = null): array
     {
         if(!class_exists($className)) {
-            throw new class((sprintf('Class %s is not exists', $className))) extends \Exception implements ContainerExceptionInterface {};
+            $message = sprintf('Class %s does not exists', $className);
+            throw new class($message) extends \Exception implements ContainerExceptionInterface {
+            };
         }
 
         $reflectionClass = new \ReflectionClass($className);
@@ -117,7 +117,7 @@ class AutowireHelper implements AutowireHelperInterface
      * @param array $reflectionParameters
      * @return array
      *
-     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
     private function resolveArgumentsFromReflectionParametersObject(array $reflectionParameters): array
@@ -145,5 +145,4 @@ class AutowireHelper implements AutowireHelperInterface
 
         return $arguments;
     }
-
 }
