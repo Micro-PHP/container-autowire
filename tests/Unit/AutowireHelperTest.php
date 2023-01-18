@@ -43,16 +43,22 @@ class AutowireHelperTest extends TestCase
     /**
      * @dataProvider dataProvider
      */
-    public function testAutowire(mixed $autowireArgs, string|null $instanceOf = null)
+    public function testAutowire(mixed $autowireArgs, string|null $instanceOf = null, string|bool|null $throws = false)
     {
-        if (!$instanceOf) {
-            $this->expectException(AutowireException::class);
+        if ($throws) {
+            $this->expectException(true === $throws ? AutowireException::class : $throws);
         }
 
         $callback = $this->autowireHelper->autowire($autowireArgs);
         $autowired = $callback();
 
-        $this->assertInstanceOf($instanceOf, $autowired);
+        if ($instanceOf) {
+            $this->assertInstanceOf($instanceOf, $autowired);
+        }
+
+        if (!$instanceOf) {
+            $this->assertEquals('HELLO!', $autowired);
+        }
 
         if (AutowireServiceArgument::class === $instanceOf) {
             $this->assertEquals(AutowireServiceArgument::class, $autowired->getName());
@@ -60,10 +66,6 @@ class AutowireHelperTest extends TestCase
 
         if (AutowireService::class === $instanceOf) {
             $this->assertEquals(AutowireServiceArgument::class, $autowired->getService()->getName());
-        }
-
-        if (\is_callable($autowired)) {
-            $this->assertEquals('HELLO!', $autowired());
         }
     }
 
@@ -73,20 +75,12 @@ class AutowireHelperTest extends TestCase
             [
                 AutowireService::class,
                 AutowireService::class,
+                false,
             ],
-
             [
                 [new AutowireService(new AutowireServiceArgument()), 'setService'],
                 AutowireService::class,
-            ],
-            [
-                new class() extends AutowireServiceArgument {
-                    public function __invoke()
-                    {
-                        return 'HELLO!';
-                    }
-                },
-                AutowireServiceArgument::class,
+                false,
             ],
             [
                 function (AutowireService $service): string {
@@ -94,56 +88,89 @@ class AutowireHelperTest extends TestCase
 
                     return 'HELLO!';
                 },
-            ],
-            // Should be throw Exception
-            [
-                fn ($service) => \get_class($service),
-            ],
-            [
-                [new AutowireService(new AutowireServiceArgument())],
-            ],
-
-            [
-                [
-                    AutowireService::class,
-                    new AutowireServiceArgument(),
-                ],
-            ],
-            [
-                [
-                    new AutowireServiceArgument(),
-                    new AutowireServiceArgument(),
-                ],
+                null,
+                false,
             ],
             [
                 [
                     new class() extends AutowireServiceArgument {
                         public function __invoke()
                         {
-                            return 'Must not returns';
+                            return 'HELLO!';
                         }
                     },
                 ],
+                null,
+                false,
+            ],
+            // Should be throw Exception
+            [   // Untyped parameter
+                fn (AutowireService|AutowireServiceArgument $service) => \get_class($service),
+                null,
+                true,
+            ],
+            [   // Untyped parameter
+                fn ($service) => \get_class($service),
+                null,
+                true,
+            ],
+            [
+                [new AutowireService(new AutowireServiceArgument())],
+                null,
+                true,
             ],
             [
                 [
-                    fn (AutowireService $service) => \get_class($service),
+                    AutowireService::class,
+                    new AutowireServiceArgument(),
                 ],
+                null,
+                true,
+            ],
+            [
+                [
+                    new AutowireServiceArgument(),
+                    new AutowireServiceArgument(),
+                ],
+                null,
+                true,
+            ],
+            [
+                [
+                    fn (AutowireService $service) => __CLASS__,
+                ],
+                null,
+                true,
             ],
             [
                 [12345],
+                null,
+                true,
+            ],
+            [
+                'ClassNoExists',
+                null,
+                true,
             ],
             [
                 ['ClassNoExists'],
+                null,
+                true,
             ],
             [
                 [],
+                null,
+                true,
             ],
             [
                 [null, null],
+                null,
+                true,
             ],
             [
                 '',
+                null,
+                true,
             ],
             [
                 [
@@ -151,6 +178,8 @@ class AutowireHelperTest extends TestCase
                     AutowireService::class,
                     AutowireService::class,
                 ],
+                null,
+                true,
             ],
         ];
     }

@@ -24,46 +24,88 @@ class AutowireHelper implements AutowireHelperInterface
 
     public function autowire(string|array|callable $target): callable
     {
-        if (\is_array($target) && !\is_callable($target) && 2 !== \count($target)) {
-            throw new AutowireException('Invalid array callback for autowire: '.var_export($target, true));
-        }
-
         return function () use ($target) {
+            if (\is_array($target)) {
+                $target = array_filter($target); // Don't allow [class-name::class-name] method
+                $tc = \count($target);
+                if (0 === $tc || $tc > 2) {
+                    $this->throwAutowireException($target, '');
+                }
+            }
+
             try {
-                if (\is_string($target) || \is_callable($target)) {
-                    return $this->resolveStringAsObject($target);
+                if ($target instanceof \Closure) {
+                    $arguments = $this->resolveArguments($target);
+
+                    return \call_user_func($target, ...$arguments);
                 }
 
-                $object = $target[0];
-                $method = $target[1] ?? '__invoke';
+                if (\is_string($target) && class_exists($target)) {
+                    $arguments = $this->resolveArguments($target);
+
+                    return new $target(...$arguments);
+                }
+
+                if (\is_object($target) && \is_callable($target)) {
+                    $arguments = $this->resolveArguments([$target, '__invoke']);
+
+                    return \call_user_func($target, ...$arguments);
+                }
+
+                if (!\is_array($target)) {
+                    $this->throwAutowireException($target, '');
+                }
+
+                $object = $target[0] ?? null;
+                $method = $target[1] ?? null;
+                $arguments = null;
+
+                if (\is_object($object)) {
+                    if (!$method) {
+                        if (!\is_callable($object)) {
+                            $this->throwAutowireException($target, sprintf('Object `%s` is not callable.', \get_class($object)));
+                        }
+
+                        if (!($object instanceof \Closure)) {
+                            $method = '__invoke';
+                        }
+                    }
+
+                    if (!\is_string($method)) {
+                        $this->throwAutowireException($target, '');
+                    }
+
+                    $arguments = $this->resolveArguments($object, $method);
+                }
+
+                if (($object instanceof \Closure) && !$method) {
+                    return \call_user_func($object, ...$arguments);
+                }
+
+                if (!$object || !$method) {
+                    $this->throwAutowireException($target, '');
+                }
 
                 if (\is_string($object)) {
                     $object = $this->resolveStringAsObject($object);
                 }
 
-                $arguments = $this->resolveArguments($object, $method);
+                if (!\is_string($method)) {
+                    $this->throwAutowireException($target, '');
+                }
 
-                return \call_user_func($target, ...$arguments); // @phpstan-ignore-line
-            } catch (\ReflectionException|\TypeError $exception) {
-                $this->throwAutowireException($target, $exception->getMessage(), $exception);
+                return \call_user_func([$object, $method], ...$arguments); // @phpstan-ignore-line
+            } catch (\InvalidArgumentException $exception) {
+                $this->throwAutowireException($target, '', $exception);
+            } catch (AutowireException $exception) {
+                throw $exception;
             }
         };
     }
 
-    protected function resolveStringAsObject(string|callable $target): object
+    protected function resolveStringAsObject(string $target): object
     {
-        $isObject = \is_object($target) && !($target instanceof \Closure);
-        $isCallable = \is_callable($target);
-
-        if ($isObject && $isCallable && !\is_string($target)) {
-            return $target; // @phpstan-ignore-line
-        }
-
-        if ($isCallable) {
-            return \call_user_func($target, ...$this->resolveArguments($target)); // @phpstan-ignore-line
-        }
-
-        if (!$isObject && !class_exists($target)) {
+        if (!class_exists($target)) {
             $this->throwAutowireException($target, 'The target class does not exist or no callable.');
         }
 
@@ -78,7 +120,7 @@ class AutowireHelper implements AutowireHelperInterface
     protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null): void
     {
         if (\is_array($target)) {
-            $target = $target[0];
+            $target = $target[0] ?? null;
         }
 
         if (\is_callable($target) && !\is_string($target)) {
@@ -97,15 +139,7 @@ class AutowireHelper implements AutowireHelperInterface
      */
     protected function resolveArguments(string|array|object $target, ?string $method = null): array
     {
-        if (\is_callable($target)) {
-            if (\is_array($target) || \is_object($target)) {
-                try {
-                    $target = \Closure::fromCallable($target);
-                } catch (\Throwable $exception) {
-                    $this->throwAutowireException($target, $exception->getMessage(), $exception);
-                }
-            }
-
+        if (\is_callable($target) && !$method && !\is_string($target)) {
             $ref = new \ReflectionFunction($target); // @phpstan-ignore-line
 
             return $this->resolveArgumentsFromReflectionParametersObject($ref->getParameters());
@@ -136,13 +170,25 @@ class AutowireHelper implements AutowireHelperInterface
     private function resolveArgumentsFromReflectionParametersObject(array $reflectionParameters): array
     {
         $arguments = [];
-
+        /** @var \ReflectionParameter $parameter */
         foreach ($reflectionParameters as $parameter) {
             $parameterType = $parameter->getType();
+            $allowedNull = $parameter->isOptional();
+            $parameterName = $parameter->getName();
             if (!$parameterType) {
+                if (!$allowedNull) {
+                    throw new \InvalidArgumentException(sprintf('The untyped argument `%s` cannot be autowired.', $parameterName));
+                }
+
                 $arguments[] = null;
 
                 continue;
+            }
+
+            if (
+                !$parameterType instanceof \ReflectionNamedType
+            ) {
+                throw new \InvalidArgumentException(sprintf('The argument `%s` has invalid type.', $parameterName));
             }
 
             $parameterTypeName = $parameterType->getName();
