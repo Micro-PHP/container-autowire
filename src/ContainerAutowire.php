@@ -1,20 +1,22 @@
 <?php
 
+/*
+ *  This file is part of the Micro framework package.
+ *
+ *  (c) Stanislau Komar <kost@micro-php.net>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Micro\Component\DependencyInjection\Autowire;
 
-use Closure;
 use Micro\Component\DependencyInjection\Container;
 
 class ContainerAutowire extends Container
 {
-    /**
-     * @var AutowireHelperFactoryInterface
-     */
     private AutowireHelperFactoryInterface $autowireHelperFactory;
 
-    /**
-     * @param Container $container
-     */
     public function __construct(private readonly Container $container)
     {
         $this->autowireHelperFactory = new AutowireHelperFactory($this->container);
@@ -39,7 +41,7 @@ class ContainerAutowire extends Container
     /**
      * {@inheritDoc}
      */
-    public function register(string $id, \Closure $service): void
+    public function register(string $id, callable $service): void
     {
         $autowiredCallback = $this->autowireHelperFactory->create()->autowire($service);
 
@@ -49,7 +51,7 @@ class ContainerAutowire extends Container
     /**
      * {@inheritDoc}
      */
-    public function decorate(string $id, Closure $service, int $priority = 0): void
+    public function decorate(string $id, callable $service, int $priority = 0): void
     {
         $autowiredCallback = $this->autowireHelperFactory->create()->autowire($service);
 
