@@ -55,7 +55,7 @@ class AutowireHelper implements AutowireHelperInterface
         $isObject = \is_object($target) && !($target instanceof \Closure);
         $isCallable = \is_callable($target);
 
-        if ($isObject && $isCallable) {
+        if ($isObject && $isCallable && !\is_string($target)) {
             return $target; // @phpstan-ignore-line
         }
 
