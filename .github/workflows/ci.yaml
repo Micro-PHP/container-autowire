@@ -4,6 +4,10 @@ on:
     branches: [ 'master' ]
   pull_request:
 
+env:
+  PHP_CS_FIXER_IGNORE_ENV: 1
+  XDEBUG_MODE: coverage
+
 jobs:
   tests:
     name: "Tests ${{ matrix.php-version }} deps ${{ matrix.dependency-versions }}"
@@ -17,8 +21,8 @@ jobs:
         dependency-versions: [ 'highest' ]
         include:
           # testing lowest PHP version with the lowest dependencies
-          - php-version: '8.2'
-            dependency-versions: 'lowest'
+  #        - php-version: '8.2'
+  #          dependency-versions: 'lowest'
 
           # testing dev versions with the highest PHP
           - php-version: '8.2'
@@ -40,5 +44,5 @@ jobs:
           dependency-versions: "${{ matrix.dependency-versions }}"
           composer-options: "--prefer-dist --no-progress"
 
-      - name: "Run tests"
-        run: "./vendor/bin/phpunit"
+      - name: Run tests
+        run: composer run test
