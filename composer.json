@@ -1,24 +1,14 @@
 {
     "name": "micro/autowire",
     "description": "Micro Framework: Component for autoconfiguring services",
-    "type": "library",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Stanislau Komar",
             "email": "stanislau_komar@epam.com"
         }
     ],
-    "autoload": {
-        "psr-4": {
-            "Micro\\Component\\DependencyInjection\\Autowire\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Micro\\Component\\DependencyInjection\\Test\\Unit\\Autowire\\": "tests/Unit"
-        }
-    },
     "require": {
         "php": "^8.2",
         "micro/dependency-injection": "^1.6"
@@ -30,6 +20,16 @@
         "phpunit/php-code-coverage": "^9.2",
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Micro\\Component\\DependencyInjection\\Autowire\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Micro\\Component\\DependencyInjection\\Test\\Unit\\Autowire\\": "tests/Unit"
+        }
     },
     "config": {
         "allow-plugins": {

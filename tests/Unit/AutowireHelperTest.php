@@ -15,9 +15,9 @@ namespace Micro\Component\DependencyInjection\Test\Unit\Autowire;
 
 use Micro\Component\DependencyInjection\Autowire\AutowireHelper;
 use Micro\Component\DependencyInjection\Autowire\ContainerAutowire;
+use Micro\Component\DependencyInjection\Autowire\Exception\AutowireException;
 use Micro\Component\DependencyInjection\Container;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerExceptionInterface;
 
 class AutowireHelperTest extends TestCase
 {
@@ -46,7 +46,7 @@ class AutowireHelperTest extends TestCase
     public function testAutowire(mixed $autowireArgs, string|null $instanceOf = null)
     {
         if (!$instanceOf) {
-            $this->expectException(ContainerExceptionInterface::class);
+            $this->expectException(AutowireException::class);
         }
 
         $callback = $this->autowireHelper->autowire($autowireArgs);
@@ -135,6 +135,22 @@ class AutowireHelperTest extends TestCase
             ],
             [
                 ['ClassNoExists'],
+            ],
+            [
+                [],
+            ],
+            [
+                [null, null],
+            ],
+            [
+                '',
+            ],
+            [
+                [
+                    null,
+                    AutowireService::class,
+                    AutowireService::class,
+                ],
             ],
         ];
     }

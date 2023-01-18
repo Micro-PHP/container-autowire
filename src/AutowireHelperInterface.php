@@ -14,7 +14,7 @@ namespace Micro\Component\DependencyInjection\Autowire;
 interface AutowireHelperInterface
 {
     /**
-     * @param class-string|array<class-string|string>|array<object|string>|callable|array<callable> $target
+     * @param class-string|array<class-string|string>|array<object|string>|callable $target
      */
     public function autowire(string|array|callable $target): callable;
 }

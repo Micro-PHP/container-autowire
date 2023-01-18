@@ -11,6 +11,7 @@
 
 namespace Micro\Component\DependencyInjection\Autowire;
 
+use Micro\Component\DependencyInjection\Autowire\Exception\AutowireException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -23,6 +24,10 @@ class AutowireHelper implements AutowireHelperInterface
 
     public function autowire(string|array|callable $target): callable
     {
+        if (\is_array($target) && !\is_callable($target) && 2 !== \count($target)) {
+            throw new AutowireException('Invalid array callback for autowire: '.var_export($target, true));
+        }
+
         return function () use ($target) {
             try {
                 if (\is_string($target) || \is_callable($target)) {
@@ -38,31 +43,24 @@ class AutowireHelper implements AutowireHelperInterface
 
                 $arguments = $this->resolveArguments($object, $method);
 
-                return \call_user_func($target, ...$arguments);
+                return \call_user_func($target, ...$arguments); // @phpstan-ignore-line
             } catch (\ReflectionException|\TypeError $exception) {
-                throw $this->throwAutowireException($target, $exception->getMessage(), $exception);
+                $this->throwAutowireException($target, $exception->getMessage(), $exception);
             }
         };
     }
 
-    /**
-     * @param class-string|callable $target
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws \ReflectionException
-     */
     protected function resolveStringAsObject(string|callable $target): object
     {
         $isObject = \is_object($target) && !($target instanceof \Closure);
         $isCallable = \is_callable($target);
 
         if ($isObject && $isCallable) {
-            return $target;
+            return $target; // @phpstan-ignore-line
         }
 
         if ($isCallable) {
-            return \call_user_func($target, ...$this->resolveArguments($target));
+            return \call_user_func($target, ...$this->resolveArguments($target)); // @phpstan-ignore-line
         }
 
         if (!$isObject && !class_exists($target)) {
@@ -74,8 +72,10 @@ class AutowireHelper implements AutowireHelperInterface
 
     /**
      * @throws ContainerExceptionInterface
+     *
+     * @phpstan-ignore-next-line
      */
-    protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null)
+    protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null): void
     {
         if (\is_array($target)) {
             $target = $target[0];
@@ -89,15 +89,11 @@ class AutowireHelper implements AutowireHelperInterface
             $target = \get_class($target);
         }
 
-        throw new class(sprintf('Can not autowire "%s". %s', $target, $message), 0, $parent) extends \RuntimeException implements ContainerExceptionInterface {};
+        throw new AutowireException(sprintf('Can not autowire "%s". %s', $target, $message), 0, $parent);
     }
 
     /**
-     * @param class-string|object $classNameOrObject
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws \ReflectionException
+     * @phpstan-ignore-next-line
      */
     protected function resolveArguments(string|array|object $target, ?string $method = null): array
     {
@@ -110,12 +106,12 @@ class AutowireHelper implements AutowireHelperInterface
                 }
             }
 
-            $ref = new \ReflectionFunction($target);
+            $ref = new \ReflectionFunction($target); // @phpstan-ignore-line
 
             return $this->resolveArgumentsFromReflectionParametersObject($ref->getParameters());
         }
 
-        $reflectionClass = new \ReflectionClass($target);
+        $reflectionClass = new \ReflectionClass($target); // @phpstan-ignore-line
 
         $reflectionClassMethod = null === $method ?
             $reflectionClass->getConstructor() :
@@ -134,6 +130,8 @@ class AutowireHelper implements AutowireHelperInterface
     /**
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     *
+     * @phpstan-ignore-next-line
      */
     private function resolveArgumentsFromReflectionParametersObject(array $reflectionParameters): array
     {
@@ -149,7 +147,14 @@ class AutowireHelper implements AutowireHelperInterface
 
             $parameterTypeName = $parameterType->getName();
 
-            if (\in_array(ContainerInterface::class, class_implements($parameterTypeName))) {
+            $classImplements = class_implements($parameterTypeName);
+            if (false === $classImplements) {
+                $arguments[] = null;
+
+                continue;
+            }
+
+            if (\in_array(ContainerInterface::class, $classImplements)) {
                 $arguments[] = $this->container;
 
                 continue;

@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ *  This file is part of the Micro framework package.
+ *
+ *  (c) Stanislau Komar <kost@micro-php.net>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Micro\Component\DependencyInjection\Tests;
 
 use Micro\Component\DependencyInjection\Autowire\ContainerAutowire;
@@ -67,7 +76,6 @@ interface NamedInterface
 class NamedService implements NamedInterface
 {
     /**
-     * @param string              $name
      * @param ModifierInterface[] $modifiers
      */
     public function __construct(private string $name, private readonly array $modifiers)
