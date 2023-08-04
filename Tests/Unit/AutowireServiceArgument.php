@@ -11,7 +11,7 @@ declare(strict_types=1);
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Test\Unit\Autowire;
+namespace Micro\Framework\Autowire\Tests\Unit;
 
 /**
  * @author Stanislau Komar <head.trackingsoft@gmail.com>

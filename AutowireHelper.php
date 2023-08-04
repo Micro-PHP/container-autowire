@@ -9,9 +9,9 @@
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Autowire;
+namespace Micro\Framework\Autowire;
 
-use Micro\Component\DependencyInjection\Autowire\Exception\AutowireException;
+use Micro\Framework\Autowire\Exception\AutowireException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;

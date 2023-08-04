@@ -11,11 +11,11 @@ declare(strict_types=1);
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Test\Unit\Autowire;
+namespace Micro\Framework\Autowire\Tests\Unit;
 
-use Micro\Component\DependencyInjection\Autowire\AutowireHelper;
-use Micro\Component\DependencyInjection\Autowire\ContainerAutowire;
-use Micro\Component\DependencyInjection\Autowire\Exception\AutowireException;
+use Micro\Framework\Autowire\AutowireHelper;
+use Micro\Framework\Autowire\ContainerAutowire;
+use Micro\Framework\Autowire\Exception\AutowireException;
 use Micro\Component\DependencyInjection\Container;
 use PHPUnit\Framework\TestCase;
 

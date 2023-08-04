@@ -9,9 +9,9 @@
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Autowire;
+namespace Micro\Framework\Autowire;
 
-use Micro\Component\DependencyInjection\Container;
+use Micro\Framework\DependencyInjection\Container;
 
 class ContainerAutowire extends Container
 {

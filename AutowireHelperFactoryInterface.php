@@ -9,7 +9,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Autowire;
+namespace Micro\Framework\Autowire;
 
 interface AutowireHelperFactoryInterface
 {

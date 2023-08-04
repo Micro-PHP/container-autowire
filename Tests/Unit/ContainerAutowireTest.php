@@ -11,10 +11,10 @@ declare(strict_types=1);
  *  file that was distributed with this source code.
  */
 
-namespace Micro\Component\DependencyInjection\Test\Unit\Autowire;
+namespace Micro\Framework\Autowire\Tests\Unit;
 
-use Micro\Component\DependencyInjection\Autowire\ContainerAutowire;
-use Micro\Component\DependencyInjection\Container;
+use Micro\Framework\Autowire\ContainerAutowire;
+use Micro\Framework\DependencyInjection\Container;
 use PHPUnit\Framework\TestCase;
 
 class ContainerAutowireTest extends TestCase
