@@ -16,7 +16,7 @@ namespace Micro\Framework\Autowire\Tests\Unit;
 use Micro\Framework\Autowire\AutowireHelper;
 use Micro\Framework\Autowire\ContainerAutowire;
 use Micro\Framework\Autowire\Exception\AutowireException;
-use Micro\Component\DependencyInjection\Container;
+use Micro\Framework\DependencyInjection\Container;
 use PHPUnit\Framework\TestCase;
 
 class AutowireHelperTest extends TestCase
