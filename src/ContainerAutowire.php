@@ -22,35 +22,23 @@ class ContainerAutowire extends Container
         $this->autowireHelperFactory = new AutowireHelperFactory($this->container);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function get(string $id): object
     {
         return $this->container->get($id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function has(string $id): bool
     {
         return $this->container->has($id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function register(string $id, callable $service): void
+    public function register(string $id, callable $service, bool $force = false): void
     {
         $autowiredCallback = $this->autowireHelperFactory->create()->autowire($service);
 
-        $this->container->register($id, $autowiredCallback);
+        $this->container->register($id, $autowiredCallback, $force);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function decorate(string $id, callable $service, int $priority = 0): void
     {
         $autowiredCallback = $this->autowireHelperFactory->create()->autowire($service);

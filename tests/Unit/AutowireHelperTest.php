@@ -43,7 +43,7 @@ class AutowireHelperTest extends TestCase
     /**
      * @dataProvider dataProvider
      */
-    public function testAutowire(mixed $autowireArgs, string|null $instanceOf = null, string|bool|null $throws = false)
+    public function testAutowire(mixed $autowireArgs, string $instanceOf = null, string|bool|null $throws = false)
     {
         if ($throws) {
             $this->expectException(true === $throws ? AutowireException::class : $throws);
@@ -105,12 +105,12 @@ class AutowireHelperTest extends TestCase
             ],
             // Should be throw Exception
             [   // Untyped parameter
-                fn (AutowireService|AutowireServiceArgument $service) => \get_class($service),
+                fn (AutowireService|AutowireServiceArgument $service) => $service::class,
                 null,
                 true,
             ],
             [   // Untyped parameter
-                fn ($service) => \get_class($service),
+                fn ($service) => $service::class,
                 null,
                 true,
             ],
