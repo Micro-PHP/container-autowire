@@ -63,7 +63,7 @@ class AutowireHelper implements AutowireHelperInterface
                 if (\is_object($object)) {
                     if (!$method) {
                         if (!\is_callable($object)) {
-                            $this->throwAutowireException($target, sprintf('Object `%s` is not callable.', \get_class($object)));
+                            $this->throwAutowireException($target, sprintf('Object `%s` is not callable.', $object::class));
                         }
 
                         if (!($object instanceof \Closure)) {
@@ -128,7 +128,7 @@ class AutowireHelper implements AutowireHelperInterface
         }
 
         if (\is_object($target)) {
-            $target = \get_class($target);
+            $target = $target::class;
         }
 
         throw new AutowireException(sprintf('Can not autowire "%s". %s', $target, $message), 0, $parent);
@@ -137,7 +137,7 @@ class AutowireHelper implements AutowireHelperInterface
     /**
      * @phpstan-ignore-next-line
      */
-    protected function resolveArguments(string|array|object $target, ?string $method = null): array
+    protected function resolveArguments(string|array|object $target, string $method = null): array
     {
         if (\is_callable($target) && !$method && !\is_string($target)) {
             $ref = new \ReflectionFunction($target); // @phpstan-ignore-line

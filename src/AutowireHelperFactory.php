@@ -19,9 +19,6 @@ readonly class AutowireHelperFactory implements AutowireHelperFactoryInterface
     {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function create(): AutowireHelperInterface
     {
         return new AutowireHelper($this->container);
