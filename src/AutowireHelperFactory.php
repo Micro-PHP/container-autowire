@@ -13,12 +13,13 @@ namespace Micro\Component\DependencyInjection\Autowire;
 
 use Psr\Container\ContainerInterface;
 
-readonly class AutowireHelperFactory implements AutowireHelperFactoryInterface
+final readonly class AutowireHelperFactory implements AutowireHelperFactoryInterface
 {
     public function __construct(private ContainerInterface $container)
     {
     }
 
+    #[\Override]
     public function create(): AutowireHelperInterface
     {
         return new AutowireHelper($this->container);

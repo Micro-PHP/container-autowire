@@ -46,7 +46,7 @@ class AutowireHelper implements AutowireHelperInterface
                     return new $target(...$arguments);
                 }
 
-                if (\is_object($target) && \is_callable($target)) {
+                if (\is_object($target)) {
                     $arguments = $this->resolveArguments([$target, '__invoke']);
 
                     return \call_user_func($target, ...$arguments);
@@ -56,14 +56,14 @@ class AutowireHelper implements AutowireHelperInterface
                     $this->throwAutowireException($target, '');
                 }
 
-                $object = $target[0] ?? null;
-                $method = $target[1] ?? null;
+                $object = $target[0] ?? null; // @phpstan-ignore-line
+                $method = $target[1] ?? null; // @phpstan-ignore-line
                 $arguments = null;
 
                 if (\is_object($object)) {
                     if (!$method) {
                         if (!\is_callable($object)) {
-                            $this->throwAutowireException($target, sprintf('Object `%s` is not callable.', $object::class));
+                            $this->throwAutowireException($target, \sprintf('Object `%s` is not callable.', $object::class));
                         }
 
                         if (!($object instanceof \Closure)) {
@@ -117,7 +117,7 @@ class AutowireHelper implements AutowireHelperInterface
      *
      * @phpstan-ignore-next-line
      */
-    protected function throwAutowireException(string|array|callable $target, string $message, \Throwable $parent = null): void
+    protected function throwAutowireException(string|array|callable $target, string $message, ?\Throwable $parent = null): void
     {
         if (\is_array($target)) {
             $target = $target[0] ?? null;
@@ -131,13 +131,13 @@ class AutowireHelper implements AutowireHelperInterface
             $target = $target::class;
         }
 
-        throw new AutowireException(sprintf('Can not autowire "%s". %s', $target, $message), 0, $parent);
+        throw new AutowireException(\sprintf('Can not autowire "%s". %s', $target, $message), 0, $parent);
     }
 
     /**
      * @phpstan-ignore-next-line
      */
-    protected function resolveArguments(string|array|object $target, string $method = null): array
+    protected function resolveArguments(string|array|object $target, ?string $method = null): array
     {
         if (\is_callable($target) && !$method && !\is_string($target)) {
             $ref = new \ReflectionFunction($target); // @phpstan-ignore-line
@@ -162,7 +162,7 @@ class AutowireHelper implements AutowireHelperInterface
     }
 
     /**
-     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      *
      * @phpstan-ignore-next-line
@@ -177,7 +177,7 @@ class AutowireHelper implements AutowireHelperInterface
             $parameterName = $parameter->getName();
             if (!$parameterType) {
                 if (!$allowedNull) {
-                    throw new \InvalidArgumentException(sprintf('The untyped argument `%s` cannot be autowired.', $parameterName));
+                    throw new \InvalidArgumentException(\sprintf('The untyped argument `%s` cannot be autowired.', $parameterName));
                 }
 
                 $arguments[] = null;
@@ -188,7 +188,7 @@ class AutowireHelper implements AutowireHelperInterface
             if (
                 !$parameterType instanceof \ReflectionNamedType
             ) {
-                throw new \InvalidArgumentException(sprintf('The argument `%s` has invalid type.', $parameterName));
+                throw new \InvalidArgumentException(\sprintf('The argument `%s` has invalid type.', $parameterName));
             }
 
             $parameterTypeName = $parameterType->getName();

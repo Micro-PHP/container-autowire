@@ -17,7 +17,9 @@ use Psr\Container\ContainerExceptionInterface;
 
 /**
  * @author Stanislau Komar <head.trackingsoft@gmail.com>
+ *
+ * @psalm-suppress UnusedClass
  */
-class AutowireException extends \RuntimeException implements ContainerExceptionInterface
+final class AutowireException extends \RuntimeException implements ContainerExceptionInterface
 {
 }
