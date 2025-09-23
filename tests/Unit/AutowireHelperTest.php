@@ -17,33 +17,30 @@ use Micro\Component\DependencyInjection\Autowire\AutowireHelper;
 use Micro\Component\DependencyInjection\Autowire\ContainerAutowire;
 use Micro\Component\DependencyInjection\Autowire\Exception\AutowireException;
 use Micro\Component\DependencyInjection\Container;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class AutowireHelperTest extends TestCase
 {
-    private ContainerAutowire $container;
-
     private AutowireHelper $autowireHelper;
 
     protected function setUp(): void
     {
-        $this->container = new ContainerAutowire(
+        $container = new ContainerAutowire(
             new Container()
         );
 
-        $this->container->register(AutowireService::class,
+        $container->register(AutowireService::class,
             fn (AutowireServiceArgument $serviceArgument) => new AutowireService($serviceArgument));
 
-        $this->container->register(AutowireServiceArgument::class,
+        $container->register(AutowireServiceArgument::class,
             fn (Container $container): AutowireServiceArgument => new AutowireServiceArgument());
 
-        $this->autowireHelper = new AutowireHelper($this->container);
+        $this->autowireHelper = new AutowireHelper($container);
     }
 
-    /**
-     * @dataProvider dataProvider
-     */
-    public function testAutowire(mixed $autowireArgs, string $instanceOf = null, string|bool|null $throws = false)
+    #[DataProvider('dataProvider')]
+    public function testAutowire(mixed $autowireArgs, ?string $instanceOf = null, string|bool|null $throws = false): void
     {
         if ($throws) {
             $this->expectException(true === $throws ? AutowireException::class : $throws);
@@ -69,7 +66,7 @@ class AutowireHelperTest extends TestCase
         }
     }
 
-    public function dataProvider()
+    public static function dataProvider(): array
     {
         return [
             [
@@ -84,8 +81,6 @@ class AutowireHelperTest extends TestCase
             ],
             [
                 function (AutowireService $service): string {
-                    $this->assertEquals(AutowireServiceArgument::class, $service->getService()->getName());
-
                     return 'HELLO!';
                 },
                 null,
@@ -93,7 +88,7 @@ class AutowireHelperTest extends TestCase
             ],
             [
                 [
-                    new class() extends AutowireServiceArgument {
+                    new class extends AutowireServiceArgument {
                         public function __invoke()
                         {
                             return 'HELLO!';

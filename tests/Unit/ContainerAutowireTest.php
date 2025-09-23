@@ -21,6 +21,7 @@ class ContainerAutowireTest extends TestCase
 {
     private ContainerAutowire $container;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->container = new ContainerAutowire(
