@@ -12,6 +12,9 @@
 namespace Micro\Component\DependencyInjection\Autowire;
 
 use Micro\Component\DependencyInjection\Container;
+use Micro\Component\DependencyInjection\ContainerDecoratorInterface;
+use Micro\Component\DependencyInjection\ContainerInterface;
+use Micro\Component\DependencyInjection\ContainerRegistryInterface;
 
 /**
  * @psalm-suppress UnusedClass
@@ -20,8 +23,11 @@ final class ContainerAutowire extends Container
 {
     private AutowireHelperFactoryInterface $autowireHelperFactory;
 
-    public function __construct(private readonly Container $container)
-    {
+    public function __construct(
+        private readonly ContainerInterface&
+        ContainerRegistryInterface&
+        ContainerDecoratorInterface $container,
+    ) {
         $this->autowireHelperFactory = new AutowireHelperFactory($this->container);
     }
 
