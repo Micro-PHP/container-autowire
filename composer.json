@@ -10,8 +10,10 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "micro/dependency-injection": "^1.6.4"
+        "micro/dependency-injection": "^1.7"
+    },
+    "require-dev": {
+        "micro/testing-tool": "^1.7"
     },
     "autoload": {
         "psr-4": {
@@ -47,10 +49,7 @@
             "@statics",
             "composer validate --strict",
             "composer normalize",
-            "@coverage"
+            "@phpunit"
         ]
-    },
-    "require-dev": {
-        "micro/testing-tool": "^1.7"
     }
 }

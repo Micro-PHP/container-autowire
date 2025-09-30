@@ -16,7 +16,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class AutowireHelper implements AutowireHelperInterface
+readonly class AutowireHelper implements AutowireHelperInterface
 {
     public function __construct(private ContainerInterface $container)
     {
